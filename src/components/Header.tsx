@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { ShieldCheck, Calendar, Users, FileSpreadsheet, Download, Upload, Sun, Moon, LogOut, Cloud, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getSheetWebAppUrl } from '../sheetConfig';
 
@@ -37,6 +37,20 @@ export default function Header({
   autoSyncError,
 }: HeaderProps) {
   const hasSheetUrl = Boolean(getSheetWebAppUrl());
+  const dateInputRef = useRef<HTMLInputElement | null>(null);
+
+  const openDatePicker = () => {
+    const input = dateInputRef.current;
+    if (!input) return;
+
+    if (typeof input.showPicker === 'function') {
+      input.showPicker();
+      return;
+    }
+
+    input.focus();
+    input.click();
+  };
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xs flex-shrink-0 transition-colors duration-200" id="app-header">
@@ -58,13 +72,18 @@ export default function Header({
           {/* Date Selector & Action Tools */}
           <div className="flex flex-wrap items-center gap-3">
             {activeTab !== 'employees' && (
-              <div className="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-200 dark:border-slate-700 focus-within:border-indigo-500 dark:focus-within:border-indigo-400 transition-colors">
+              <div
+                className="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-200 dark:border-slate-700 focus-within:border-indigo-500 dark:focus-within:border-indigo-400 transition-colors cursor-pointer min-w-[170px]"
+                onClick={openDatePicker}
+              >
                 <Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400 mr-2" />
                 <input
+                  ref={dateInputRef}
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-transparent text-sm font-semibold focus:outline-none text-slate-700 dark:text-slate-200 font-sans cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-transparent text-sm font-semibold focus:outline-none text-slate-700 dark:text-slate-200 font-sans cursor-pointer flex-1 min-w-0"
                   id="header-date-input"
                 />
               </div>
