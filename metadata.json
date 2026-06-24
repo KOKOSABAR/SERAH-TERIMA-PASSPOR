@@ -1,0 +1,6 @@
+{
+  "name": "Logbook Serah Terima Paspor",
+  "description": "Sistem pencatatan digital untuk serah terima paspor karyawan saat masuk dan pulang kerja setiap hari.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
