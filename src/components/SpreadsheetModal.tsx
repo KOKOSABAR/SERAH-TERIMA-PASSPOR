@@ -21,6 +21,27 @@ interface SpreadsheetModalProps {
   autoSyncError?: string;
 }
 
+async function readProxyResponse(response: Response) {
+  const text = await response.text();
+  let data: any = null;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.message || text || `HTTP ${response.status}`);
+  }
+
+  if (!data) {
+    throw new Error(text || 'Respons server tidak valid');
+  }
+
+  return data;
+}
+
 export default function SpreadsheetModal({
   isOpen,
   onClose,
@@ -396,7 +417,7 @@ function formatDate(dateVal) {
         })
       });
       
-      const resData = await response.json();
+      const resData = await readProxyResponse(response);
       if (resData.success) {
         setIsConnected(true);
         setSyncMessage('Koneksi sukses! Header tabel Google Spreadsheet dan daftar Staff telah terkonfigurasi otomatis.');
@@ -522,7 +543,7 @@ function formatDate(dateVal) {
         })
       });
 
-      const resData = await response.json();
+      const resData = await readProxyResponse(response);
       if (resData.success) {
         setSyncMessage(`Sinkronisasi berhasil! ${payloadData.length} baris data berhasil disinkronkan.`);
         setIsConnected(true);

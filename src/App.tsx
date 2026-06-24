@@ -16,6 +16,27 @@ import SpreadsheetModal from './components/SpreadsheetModal';
 import LoginGate from './components/LoginGate';
 import { ShieldAlert, RefreshCw, Cloud, CloudOff, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 
+async function readProxyResponse(response: Response) {
+  const text = await response.text();
+  let data: any = null;
+
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.message || text || `HTTP ${response.status}`);
+  }
+
+  if (!data) {
+    throw new Error(text || 'Respons server tidak valid');
+  }
+
+  return data;
+}
+
 export default function App() {
   // Initialize States from localStorage or default configurations
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -199,7 +220,7 @@ export default function App() {
           })
         });
 
-        const resData = await response.json();
+        const resData = await readProxyResponse(response);
         if (resData.success) {
           setAutoSyncStatus('success');
           lastSyncHashRef.current = dataHash;
