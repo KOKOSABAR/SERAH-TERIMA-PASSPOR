@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Employee, PassportLog } from '../types';
 import { OFFICER_LIST } from './DailyHandoverTable';
+import { getSheetWebAppUrl, persistSheetWebAppUrl } from '../sheetConfig';
 
 interface SpreadsheetModalProps {
   isOpen: boolean;
@@ -364,14 +365,9 @@ function formatDate(dateVal) {
 
   // Load URL from localstorage
   useEffect(() => {
-    const savedUrl = localStorage.getItem('passport_guard_sheet_url');
-    if (savedUrl) {
-      setWebAppUrl(savedUrl);
-      setIsConnected(true);
-    } else {
-      setWebAppUrl('');
-      setIsConnected(null);
-    }
+    const savedUrl = persistSheetWebAppUrl(getSheetWebAppUrl());
+    setWebAppUrl(savedUrl);
+    setIsConnected(true);
   }, []);
 
   const handleCopyCode = () => {
@@ -380,19 +376,20 @@ function formatDate(dateVal) {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleSaveUrl = (url: string) => {
+  const handleChangeUrl = (url: string) => {
     setWebAppUrl(url);
-    if (!url.trim()) {
-      localStorage.removeItem('passport_guard_sheet_url');
-      setIsConnected(null);
-    } else {
-      localStorage.setItem('passport_guard_sheet_url', url.trim());
-    }
+    setIsConnected(null);
+  };
+
+  const handlePersistUrl = () => {
+    const finalUrl = persistSheetWebAppUrl(webAppUrl);
+    setWebAppUrl(finalUrl);
   };
 
   // Test connection and auto-create headers
   const testConnection = async () => {
-    if (!webAppUrl.trim()) return;
+    const activeUrl = persistSheetWebAppUrl(webAppUrl);
+    setWebAppUrl(activeUrl);
     setIsTesting(true);
     setSyncMessage('');
     try {
@@ -402,7 +399,7 @@ function formatDate(dateVal) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          url: webAppUrl.trim(),
+          url: activeUrl,
           payload: { 
             action: 'test',
             employees: employees.map(emp => ({
@@ -421,7 +418,7 @@ function formatDate(dateVal) {
       if (resData.success) {
         setIsConnected(true);
         setSyncMessage('Koneksi sukses! Header tabel Google Spreadsheet dan daftar Staff telah terkonfigurasi otomatis.');
-        localStorage.setItem('passport_guard_sheet_url', webAppUrl.trim());
+        persistSheetWebAppUrl(activeUrl);
       } else {
         setIsConnected(false);
         setSyncMessage(`Koneksi ditolak oleh script: ${resData.message}`);
@@ -513,7 +510,8 @@ function formatDate(dateVal) {
   };
 
   const handleSync = async (syncType: 'all' | 'date') => {
-    if (!webAppUrl.trim()) return;
+    const activeUrl = persistSheetWebAppUrl(webAppUrl);
+    setWebAppUrl(activeUrl);
     setIsSyncing(true);
     setSyncMessage('');
     const payloadData = prepareData(syncType);
@@ -525,7 +523,7 @@ function formatDate(dateVal) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          url: webAppUrl.trim(),
+          url: activeUrl,
           payload: {
             action: 'sync',
             syncType,
@@ -615,7 +613,8 @@ function formatDate(dateVal) {
                     type="url"
                     placeholder="https://script.google.com/macros/s/.../exec"
                     value={webAppUrl}
-                    onChange={(e) => handleSaveUrl(e.target.value)}
+                    onChange={(e) => handleChangeUrl(e.target.value)}
+                    onBlur={handlePersistUrl}
                     className="w-full px-3 py-2 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 bg-white"
                     id="input-webapp-url"
                   />

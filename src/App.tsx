@@ -15,6 +15,7 @@ import MonthlyReportView from './components/MonthlyReportView';
 import SpreadsheetModal from './components/SpreadsheetModal';
 import LoginGate from './components/LoginGate';
 import { ShieldAlert, RefreshCw, Cloud, CloudOff, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
+import { getSheetWebAppUrl, persistSheetWebAppUrl } from './sheetConfig';
 
 async function readProxyResponse(response: Response) {
   const text = await response.text();
@@ -63,6 +64,8 @@ export default function App() {
 
   // Load and bootstrap initial data on first mount
   useEffect(() => {
+    persistSheetWebAppUrl();
+
     // 1. Get or set today's local date (e.g., "2026-06-24")
     const now = new Date();
     // Force date to match current local year/month/date format YYYY-MM-DD
@@ -169,7 +172,7 @@ export default function App() {
     setAutoSyncStatus('syncing');
 
     const delayDebounce = setTimeout(async () => {
-      const webAppUrl = localStorage.getItem('passport_guard_sheet_url');
+      const webAppUrl = getSheetWebAppUrl();
       if (!webAppUrl || !webAppUrl.trim()) {
         setAutoSyncStatus('idle');
         return;

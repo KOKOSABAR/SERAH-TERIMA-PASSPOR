@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { ShieldCheck, Calendar, Users, FileSpreadsheet, Download, Upload, Sun, Moon, LogOut, Cloud, CheckCircle2, AlertCircle } from 'lucide-react';
+import { getSheetWebAppUrl } from '../sheetConfig';
 
 interface HeaderProps {
   activeTab: 'daily' | 'employees' | 'monthly';
@@ -35,6 +36,8 @@ export default function Header({
   autoSyncStatus,
   autoSyncError,
 }: HeaderProps) {
+  const hasSheetUrl = Boolean(getSheetWebAppUrl());
+
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xs flex-shrink-0 transition-colors duration-200" id="app-header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,7 +82,7 @@ export default function Header({
                 <span className="uppercase tracking-wider">Spreadsheet</span>
               </button>
 
-              {localStorage.getItem('passport_guard_sheet_url') && (
+              {hasSheetUrl && (
                 <div className="flex items-center bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-lg py-1.5 px-3 space-x-2 shadow-2xs" id="sheets-sync-status-badge">
                   <div className="relative flex h-3.5 w-3.5 items-center justify-center">
                     {autoSyncStatus === 'syncing' ? (
@@ -213,4 +216,3 @@ export default function Header({
     </header>
   );
 }
-
